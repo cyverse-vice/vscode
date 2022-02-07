@@ -2,21 +2,18 @@
 
  # Open VSCode Server
 
-[Visual Studio Code](https://github.com/microsoft/vscode) built using [GitPod's Open VSCode Server image](https://hub.docker.com/r/gitpod/openvscode-server) base image.
+[Visual Studio Code](https://github.com/microsoft/vscode) built from [GitPod's Open VS Code Server](https://hub.docker.com/r/gitpod/openvscode-server) base image.
   
-quick launch | 
------------- | 
-<a href="https://de.cyverse.org/de/?type=quick-launch&quick-launch-id=19f6a94b-71b6-4034-a7a5-40f7bea0b85b&app-id=75773c76-8ee1-11e9-907f-008cfa5ae621" target="_blank"><img src="https://de.cyverse.org/Powered-By-CyVerse-blue.svg"></a> 
+| quick launch | 
+| ------------ | 
+| <a href="https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch" target="_blank"><img src="https://img.shields.io/badge/VS%20Code-latest-blue?style=plastic&logo=visualstudiocode"></a> |
 
-# Instructions
-
-example: 
 
 ## Run Docker locally or on a Virtual Machine
 
 To run the container, you must first pull them from DockerHub, or activate a [CyVerse Account](https://user.cyverse.org/services/mine).
 
-A Docker container hosted on DockerHub.
+A Docker container hosted on CyVerse Harbor Registry <https://harbor.cyverse.org/harbor/projects/17/repositories/vscode>
 
 ```
 docker pull harbor.cyverse.org/vice/vscode:latest
