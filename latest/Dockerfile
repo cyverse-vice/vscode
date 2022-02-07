@@ -103,4 +103,4 @@ RUN apt-get update && \
 COPY entry.sh /bin
 RUN mkdir -p /home/workspace/.irods
 
-ENTRYPOINT [/bin/bash /bin/entry.sh]
+ENTRYPOINT ["bash", "/bin/entry.sh"]

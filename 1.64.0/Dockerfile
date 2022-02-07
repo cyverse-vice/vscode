@@ -101,6 +101,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY entry.sh /bin
-RUN mkdir -p /home/jovyan/.irods
+RUN mkdir -p /home/workspace/.irods
 
-ENTRYPOINT [/bin/bash /bin/entry.sh]
+ENTRYPOINT ["bash", "/bin/entry.sh"]
