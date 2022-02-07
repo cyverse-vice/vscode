@@ -1,22 +1,22 @@
-FROM harbor.cyverse.org/hub/gitpod/openvscode-server:latest
+FROM gitpod/openvscode-server:latest
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.name="CyVerse RStudio verse" \
-      org.label-schema.description="Built from Rocker-Project RStudio Verse, additional depends for CyVerse K8s workbench" \
+      org.label-schema.name="CyVerse VSCode" \
+      org.label-schema.description="Built from GitPod Open VSCode, additional depends for CyVerse K8s workbench" \
       org.label-schema.url="https://cyverse.org" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="e.g. https://github.com/cyverse-vice/rstudio-verse" \
+      org.label-schema.vcs-url="e.g. https://github.com/cyverse-vice/vscode" \
       org.label-schema.vendor="CyVerse" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0.0"
 
-MAINTAINER "Tyson Lee Swetnam tswetnam@cyverse.org"
-
 USER root
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install a few dependencies for iCommands, text editing, and monitoring instances
 RUN apt-get update && \
@@ -54,7 +54,7 @@ RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | apt-key add - 
     rm -rf /var/lib/apt/lists/*
 
 # Install Go
-RUN wget -q -c https://dl.google.com/go/go1.17.6.linux-amd64.tar.gz -O - | sudo tar -xz -C /usr/local
+RUN wget -q -c https://dl.google.com/go/go1.17.6.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
 ENV PATH=$PATH:/usr/local/go/bin 
 
 # Install Rust
@@ -62,12 +62,12 @@ RUN apt-get update && \
     apt-get install -y cargo rustc
 
 # Install CyberDuck CLI
-RUN echo -e "deb https://s3.amazonaws.com/repo.deb.cyberduck.io stable main" | tee /etc/apt/sources.list.d/cyberduck.list > /dev/null && \
+RUN echo "deb https://s3.amazonaws.com/repo.deb.cyberduck.io stable main" | tee /etc/apt/sources.list.d/cyberduck.list > /dev/null && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FE7097963FEFBE72 && \
     apt-get update && \
     apt-get install duck
     
 COPY entry.sh /bin
-RUN mkdir -p /home/jovyan/.irods
+RUN mkdir -p /home/openvscode-server/.irods
 
 ENTRYPOINT ["bash", "/bin/entry.sh"]    
