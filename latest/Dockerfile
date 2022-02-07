@@ -20,7 +20,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Install a few dependencies for iCommands, text editing, and monitoring instances
 RUN apt-get update && \
-    apt-get install -y lsb-release apt-transport-https curl gnupg2 libfuse2 gcc less nodejs software-properties-common apt-utils glances htop nano  && \
+    apt-get install -y lsb-release apt-transport-https curl gnupg2 libfuse2 gettext gcc less nodejs software-properties-common apt-utils glances htop nano  && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -66,8 +66,41 @@ RUN echo "deb https://s3.amazonaws.com/repo.deb.cyberduck.io stable main" | tee 
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FE7097963FEFBE72 && \
     apt-get update && \
     apt-get install duck
-    
+
+# Install MiniConda and Tini
+ENV TZ America/Phoenix
+ENV LANG=C.UTF-8 
+ENV LC_ALL "en_US.UTF-8"
+ENV PATH /opt/conda/bin:$PATH
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
+RUN apt-get update && \
+    apt-get install -y wget bzip2 ca-certificates \
+    libglib2.0-0 libxext6 libsm6 libxrender1 \
+    gettext-base git mercurial subversion \
+    tmux && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/workspace/.bashrc && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/workspace/.zshrc && \
+    chown -R 1000:1000 /opt/conda
+
+RUN apt-get update && \
+    apt-get install -y curl grep sed dpkg && \
+    TINI_VERSION=`curl https://github.com/krallin/tini/releases/latest | grep -o "/v.*\"" | sed 's:^..\(.*\).$:\1:'` && \
+    curl -L "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini_${TINI_VERSION}.deb" > tini.deb && \
+    dpkg -i tini.deb && \
+    rm tini.deb && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY entry.sh /bin
-RUN mkdir -p /home/openvscode-server/.irods
+RUN mkdir -p /home/workspace/.irods
 
 ENTRYPOINT ["bash", "/bin/entry.sh"]    
