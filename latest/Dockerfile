@@ -100,5 +100,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY entry.sh /bin/entry.sh
+COPY entry.sh /bin
+RUN mkdir -p /home/workspace/.irods
+
 ENTRYPOINT [/bin/bash /bin/entry.sh]
