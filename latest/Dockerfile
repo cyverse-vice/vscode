@@ -99,3 +99,5 @@ RUN apt-get update && \
     rm tini.deb && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT [/bin/bash /bin/entry.sh]
