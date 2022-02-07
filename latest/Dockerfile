@@ -99,6 +99,3 @@ RUN apt-get update && \
     rm tini.deb && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /home/workspace/.irods
-RUN echo '{"irods_host": "data.cyverse.org", "irods_port": 1247, "irods_user_name": "$IPLANT_USER", "irods_zone_name": "iplant"}' | envsubst > /home/workspace/.irods/irods_environment.json  
