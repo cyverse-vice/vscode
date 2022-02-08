@@ -4,10 +4,9 @@
 
 [Visual Studio Code](https://github.com/microsoft/vscode) built from [GitPod's Open VS Code Server](https://hub.docker.com/r/gitpod/openvscode-server) base image.
   
-| quick launch | 
-| ------------ | 
-| <a href="https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch" target="_blank"><img src="https://img.shields.io/badge/VS%20Code-latest-blue?style=plastic&logo=visualstudiocode"></a> |
-
+| quick launch |
+| ------------ |
+| <a href="https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch" target="_blank"><img src="https://img.shields.io/badge/VS%20Code-latest-6C33AF?style=plastic&logo=visualstudiocode"></a> |
 
 ## Run Docker locally or on a Virtual Machine
 
@@ -30,6 +29,11 @@ docker run -it --rm -d -p 3000:3000 harbor.cyverse.org/vice/vscode:latest
 You can build a new Docker container with additional dependencies from this Docker Hub image by using the `FROM harbor.cyverse.org/vice/vscode:latest` at the beginning of your own Dockerfile.
 
 ###### Developer notes
+
+Add the <a href="https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch" target="_blank"><img src="https://img.shields.io/badge/VS%20Code-latest-6C33AF?style=plastic&logo=visualstudiocode"></a> badge to your webpage: 
+```
+ <a href="https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch" target="_blank"><img src="https://img.shields.io/badge/VS%20Code-latest-6C33AF?style=plastic&logo=visualstudiocode"></a>
+```
 
 To test the container locally:
 
