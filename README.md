@@ -3,7 +3,10 @@
  # Open VSCode Server
 
 [Visual Studio Code](https://github.com/microsoft/vscode) built from [GitPod's Open VS Code Server](https://hub.docker.com/r/gitpod/openvscode-server) base image.
-  
+
+[![!Harbor](https://github.com/cyverse-vice/vscode/actions/workflows/harbor.yml/badge.svg)](https://github.com/cyverse-vice/vscode/actions) ![GitHub commits since tagged version](https://img.shields.io/github/commits-since/cyverse-vice/vscode/latest/main?style=flat-square) 
+
+
 | quick launch |
 | ------------ |
 | <a href="https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch" target="_blank"><img src="https://img.shields.io/badge/VS%20Code-latest-6C33AF?style=plastic&logo=visualstudiocode"></a> |
