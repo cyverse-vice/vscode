@@ -11,7 +11,7 @@
 
 ## Run Docker locally or on a Virtual Machine
 
-To run the container, you must first pull them from DockerHub, or activate a [CyVerse Account](https://user.cyverse.org/services/mine).
+To run the container, you must first pull it from our private/public [Harbor Registry](https://harbor.cyverse.org/harbor/projects), or activate a [CyVerse Account](https://user.cyverse.org/services/mine) and use it in our data science workbench, called the "[Discovery Environment](https://de.cyverse.org/apps/de/091c830a-4be1-11ec-aad9-008cfa5ae621/launch)" or DE for short.
 
 A Docker container hosted on CyVerse Harbor Registry <https://harbor.cyverse.org/harbor/projects/17/repositories/vscode>
 
@@ -23,9 +23,9 @@ docker pull harbor.cyverse.org/vice/vscode:latest
 docker run -it --rm -d -p 3000:3000 harbor.cyverse.org/vice/vscode:latest
 ```
 
-## Run Docker container in CyVerse VICE
+## Run your own Docker container in CyVerse VICE
 
-Unless you plan on making changes to this container, you should just use the existing launch button above.
+[Deploying your own Tools and Apps in CyVerse](https://learning.cyverse.org/projects/vice/en/latest/) 
 
 You can build a new Docker container with additional dependencies from this Docker Hub image by using the `FROM harbor.cyverse.org/vice/vscode:latest` at the beginning of your own Dockerfile.
 
