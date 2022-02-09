@@ -102,6 +102,6 @@ RUN apt-get update && \
 
 COPY entry.sh /bin
 RUN mkdir -p /home/workspace/.irods
-RUN chown 1000:1000 /home/workspace/
+RUN chown -R 1000:1000 /home/workspace/
 
 ENTRYPOINT ["bash", "/bin/entry.sh"]
