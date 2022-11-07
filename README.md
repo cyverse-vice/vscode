@@ -27,7 +27,7 @@ docker run -it --rm -d -p 3000:3000 harbor.cyverse.org/vice/vscode:latest
 
 ## Run your own Docker container in CyVerse VICE
 
-[Deploying your own Tools and Apps in CyVerse](https://learning.cyverse.org/projects/vice/en/latest/) 
+[Deploying your own Tools and Apps in CyVerse](https://learning.cyverse.org/vice/about/)
 
 You can build a new Docker container with additional dependencies from this Docker Hub image by using the `FROM harbor.cyverse.org/vice/vscode:latest` at the beginning of your own Dockerfile.
 
