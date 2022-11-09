@@ -46,15 +46,15 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
-      - name: Build and push 1.64.0
-        id: docker_build_one_six_four_zero
+      - name: Build and push 1.68.0
+        id: docker_build_one_six_eight_zero
         uses: docker/build-push-action@v2.6.1
         with:
-          context: 1.64.0 
-          file: 1.64.0/Dockerfile
+          context: 1.68.0 
+          file: 1.68.0/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: harbor.cyverse.org/vice/vscode:1.64.0
+          tags: harbor.cyverse.org/vice/vscode:1.68.0
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
