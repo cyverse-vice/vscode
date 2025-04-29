@@ -1,114 +1,70 @@
-FROM gitpod/openvscode-server:1.68.0
-
-# Build-time metadata as defined at http://label-schema.org
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
-LABEL org.label-schema.build-date=$BUILD_DATE \
-    org.label-schema.name="CyVerse VSCode" \
-    org.label-schema.description="Built from GitPod Open VSCode, additional depends for CyVerse K8s workbench" \
-    org.label-schema.url="https://cyverse.org" \
-    org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url="e.g. https://github.com/cyverse-vice/vscode" \
-    org.label-schema.vendor="CyVerse" \
-    org.label-schema.version=$VERSION \
-    org.label-schema.schema-version="1.0.0"
+FROM lscr.io/linuxserver/code-server:latest
 
 USER root
 
-ARG DEBIAN_FRONTEND=noninteractive
+# Install a few dependencies for goCommands, text editing, and monitoring instances
+RUN apt update && \
+    apt install -y lsb-release apt-transport-https curl libfreetype6-dev pkg-config libx11-dev gcc gettext gnupg less software-properties-common apt-utils glances htop nano wget
 
-# Install a few dependencies for iCommands, text editing, and monitoring instances
-RUN apt-get update && \
-    apt-get install -y lsb-release apt-transport-https curl gnupg2 libfuse2 gettext gcc less nodejs software-properties-common apt-utils glances htop nano  && \
-    apt-get clean && \
+# Install GoCommands https://learning.cyverse.org/ds/gocommands/ 
+RUN cd /usr/local/bin/ && \
+    GOCMD_VER=$(curl -L -s https://raw.githubusercontent.com/cyverse/gocommands/main/VERSION.txt); \
+    curl -L -s https://github.com/cyverse/gocommands/releases/download/${GOCMD_VER}/gocmd-${GOCMD_VER}-linux-amd64.tar.gz | tar zxvf -
+
+# Add sudo 
+RUN apt update && \
+    apt install -y sudo && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    apt-get install -y vim-nox && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Create user vscode with specific UID and GID
+RUN groupadd -g 1000 vscode && \
+    useradd -m -u 1000 -g 1000 -s /bin/bash vscode && \
+    usermod -aG sudo vscode && \
+    echo "vscode ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-RUN apt-get update && \
-    apt-get install -y emacs-nox && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | apt-key add - && \
-    echo "deb [arch=amd64] https://packages.irods.org/apt/ bionic main" > /etc/apt/sources.list.d/renci-irods.list && \
-    apt-get update && \
-    wget -q -c \
-    http://security.ubuntu.com/ubuntu/pool/main/p/python-urllib3/python-urllib3_1.22-1ubuntu0.18.04.2_all.deb \
-    http://security.ubuntu.com/ubuntu/pool/main/r/requests/python-requests_2.18.4-2ubuntu0.1_all.deb \
-    http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.0/libssl1.0.0_1.0.2n-1ubuntu5.10_amd64.deb && \
-    apt install -y \
-    ./python-urllib3_1.22-1ubuntu0.18.04.2_all.deb \
-    ./python-requests_2.18.4-2ubuntu0.1_all.deb \
-    ./libssl1.0.0_1.0.2n-1ubuntu5.10_amd64.deb && \
-    rm -rf \
-    ./python-urllib3_1.22-1ubuntu0.18.04.2_all.deb \
-    ./python-requests_2.18.4-2ubuntu0.1_all.deb \
-    ./libssl1.0.0_1.0.2n-1ubuntu5.10_amd64.deb && \
-    apt install -y irods-icommands && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Go
-RUN wget -q -c https://dl.google.com/go/go1.17.6.linux-amd64.tar.gz -O - | tar -xz -C /usr/local
-ENV PATH=$PATH:/usr/local/go/bin 
-
-# Install Rust
-RUN apt-get update && \
-    apt-get install -y cargo rustc
-
-# Install CyberDuck CLI
-RUN echo "deb https://s3.amazonaws.com/repo.deb.cyberduck.io stable main" | tee /etc/apt/sources.list.d/cyberduck.list > /dev/null && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FE7097963FEFBE72 && \
-    apt-get update && \
-    apt-get install duck
-
-# Install MiniConda and Tini
-ENV TZ America/Phoenix
-ENV LANG=C.UTF-8 
-ENV LC_ALL "en_US.UTF-8"
-ENV PATH /opt/conda/bin:$PATH
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
-    echo $TZ > /etc/timezone
-
-RUN apt-get update && \
-    apt-get install -y wget bzip2 ca-certificates \
-    libglib2.0-0 libxext6 libsm6 libxrender1 \
-    gettext-base git mercurial subversion \
-    tmux && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/workspace/.bashrc && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/workspace/.zshrc && \
-    chown -R 1000:1000 /opt/conda
-
-RUN apt-get update && \
-    apt-get install -y curl grep sed dpkg && \
-    TINI_VERSION="$(curl -L -s https://github.com/krallin/tini/releases/latest |  grep -o "/v.*\"" | sed 's:^..\(.*\).$:\1:' | cut -d '"' -f1 | sed -n '$p')" && \
-    curl -L "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini_${TINI_VERSION}.deb" > tini.deb && \
-    cat tini.deb &&\
-    dpkg -i tini.deb && \
-    rm tini.deb && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install GitHub CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
+# Install cuda toolkit and nvidia drivers
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
     apt update && \
-    apt install gh
+    apt install -y cuda-toolkit-12-5 nvidia-driver-535 -y
+
+# Set ownership for home directory
+RUN chown -R vscode:vscode /home/vscode && \
+    chown -R vscode:vscode /config
+
+# Install Miniconda and Mamba
+RUN curl -sSLo /tmp/Miniconda3.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    bash /tmp/Miniconda3.sh -b -p /opt/conda && \
+    rm /tmp/Miniconda3.sh && \
+    /opt/conda/bin/conda install -y mamba -n base -c conda-forge && \
+    /opt/conda/bin/conda clean -afy && \
+    chown -R vscode:vscode /opt/conda
+
+# Install Ollama and dependecies
+RUN apt install pciutils -y && \
+curl https://ollama.ai/install.sh | sh
+
+#RUN ollama serve & sleep 5 && ollama run mxbai-embed-large
+
+USER vscode
+
+# install git credential manager
+RUN cd /home/vscode && \
+    wget https://github.com/git-ecosystem/git-credential-manager/releases/download/v2.5.0/gcm-linux_amd64.2.5.0.deb && \
+    sudo dpkg -i gcm-linux_amd64.2.5.0.deb && \
+    rm gcm-linux_amd64.2.5.0.deb
+
+# set the ENV for the credential type
+ENV GCM_CREDENTIAL_STORE=cache
+
+EXPOSE 8443
 
 COPY entry.sh /bin
-RUN mkdir -p /home/workspace/.irods
-RUN chown -R 1000:1000 /home/workspace/
+
+# Set up environment variables for Conda
+ENV PATH="/opt/conda/bin:$PATH"
+
+WORKDIR /home/vscode
 
 ENTRYPOINT ["bash", "/bin/entry.sh"]
