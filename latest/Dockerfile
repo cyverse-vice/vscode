@@ -61,6 +61,7 @@ ENV GCM_CREDENTIAL_STORE=cache
 EXPOSE 8443
 
 COPY entry.sh /bin
+COPY config.yaml /config/.config/code-server/config.yaml
 
 # Set up environment variables for Conda
 ENV PATH="/opt/conda/bin:$PATH"

@@ -23,7 +23,5 @@ if [ -d /data-store/iplant/home/$IPLANT_USER/.ssh ]; then
   cp -r /data-store/iplant/home/$IPLANT_USER/.ssh ~/ 
 fi
 
-PASSWORD=password
-
 # Start code-server
-exec /app/code-server/bin/code-server --host 0.0.0.0  --cert --bind-addr 0.0.0.0:8080 /app --disable-telemetry --
+exec /app/code-server/bin/code-server --host 0.0.0.0 --disable-telemetry --
