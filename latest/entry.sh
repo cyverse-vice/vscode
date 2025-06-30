@@ -23,5 +23,9 @@ if [ -d /data-store/iplant/home/$IPLANT_USER/.ssh ]; then
   cp -r /data-store/iplant/home/$IPLANT_USER/.ssh ~/ 
 fi
 
+if [ -d /data-store/iplant/home/$IPLANT_USER/.vscode-server ]; then
+  cp -r /data-store/iplant/home/$IPLANT_USER/.vscode-server ~/ 
+fi
+
 # Start code-server
 exec /app/code-server/bin/code-server --host 0.0.0.0 --disable-telemetry --
