@@ -34,6 +34,12 @@ RUN apt update && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Node
+RUN curl -fsSL https://deb.nodesource.com/setup_23.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt install -y nodejs && \
+    rm nodesource_setup.sh
+
 # Install GoCommands https://learning.cyverse.org/ds/gocommands/
 RUN cd /usr/local/bin/ && \
     GOCMD_VER=$(curl -L -s https://raw.githubusercontent.com/cyverse/gocommands/main/VERSION.txt) && \
@@ -106,6 +112,7 @@ ENV GCM_CREDENTIAL_STORE=cache
 RUN /app/code-server/bin/code-server --install-extension ms-python.python && \
     /app/code-server/bin/code-server --install-extension vscode-icons-team.vscode-icons && \
     /app/code-server/bin/code-server --install-extension ms-toolsai.jupyter && \
+    /app/code-server/bin/code-server --install-extension saoudrizwan.claude-dev && \
     echo "VS Code extensions installed"
 
 # Expose both ports (8443 for HTTPS, 8080 used in config.yaml)
