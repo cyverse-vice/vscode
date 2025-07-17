@@ -83,7 +83,8 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86
 RUN curl -sSLo /tmp/Miniconda3.sh https://repo.anaconda.com/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
     bash /tmp/Miniconda3.sh -b -p /opt/conda && \
     rm /tmp/Miniconda3.sh && \
-    /opt/conda/bin/conda install -y mamba -n base -c conda-forge && \
+    /opt/conda/bin/conda config --set channel_priority strict && \
+    /opt/conda/bin/conda install -y mamba -n base -c conda-forge --override-channels && \
     /opt/conda/bin/conda clean -afy && \
     chown -R vscode:vscode /opt/conda && \
     echo "Miniconda and Mamba installed successfully"
@@ -95,6 +96,17 @@ RUN curl https://ollama.ai/install.sh | sh && \
 # Initialize Ollama with models (commented out - uncomment if needed)
 #RUN ollama serve & sleep 5 && ollama run mxbai-embed-large && \
 #    echo "Ollama initialized with mxbai-embed-large model"
+
+# Install filesystem MCP server
+RUN npm install -g @modelcontextprotocol/server-filesystem && \
+    echo "Filesystem MCP server installed"
+
+# Install Globus Connect Server
+RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb && \
+    dpkg -i globus-repo_latest_all.deb && \
+    apt update && \
+    apt install globus-connect-server54 -y && \
+    rm globus-repo_latest_all.deb
 
 USER vscode
 
@@ -108,6 +120,7 @@ RUN cd /home/vscode && \
 # Set the environment variable for the credential type
 ENV GCM_CREDENTIAL_STORE=cache
 
+   
 # Install VS Code extensions
 RUN /app/code-server/bin/code-server --install-extension ms-python.python && \
     /app/code-server/bin/code-server --install-extension vscode-icons-team.vscode-icons && \
@@ -131,5 +144,7 @@ WORKDIR /home/vscode
 # Add healthcheck to verify the service is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/ || exit 1
+
+RUN sudo chown -R vscode:vscode /config 
 
 ENTRYPOINT ["bash", "/bin/entry.sh"]

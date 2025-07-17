@@ -27,5 +27,15 @@ if [ -d /data-store/iplant/home/$IPLANT_USER/.vscode-server ]; then
   cp -r /data-store/iplant/home/$IPLANT_USER/.vscode-server ~/ 
 fi
 
+# Copy cline MCP settings if they exist
+if [ -f /data-store/iplant/home/$IPLANT_USER/.vscode-server/cline_mcp_settings.json ]; then
+  mkdir -p ~/.vscode-server/data/User/globalStorage/saoudrizwan.claude-dev/settings/
+  cp /data-store/iplant/home/$IPLANT_USER/.vscode-server/cline_mcp_settings.json /config/.local/share/code-server/User/globalStorage/saoudrizwan.claude-dev/settings/
+  echo "MCP settings copied from data-store"
+fi
+
+# Change to user's data-store directory
+cd /data-store/iplant/home/$IPLANT_USER || cd /home/vscode
+
 # Start code-server
-exec /app/code-server/bin/code-server --host 0.0.0.0 --disable-telemetry --
+exec /app/code-server/bin/code-server --host 0.0.0.0 --disable-telemetry
