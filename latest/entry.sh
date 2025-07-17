@@ -29,7 +29,7 @@ fi
 
 # Copy cline MCP settings if they exist
 if [ -f /data-store/iplant/home/$IPLANT_USER/.vscode-server/cline_mcp_settings.json ]; then
-  mkdir -p ~/.vscode-server/data/User/globalStorage/saoudrizwan.claude-dev/settings/
+  mkdir -p /config/.local/share/code-server/User/globalStorage/saoudrizwan.claude-dev/settings/
   cp /data-store/iplant/home/$IPLANT_USER/.vscode-server/cline_mcp_settings.json /config/.local/share/code-server/User/globalStorage/saoudrizwan.claude-dev/settings/
   echo "MCP settings copied from data-store"
 fi
