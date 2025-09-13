@@ -26,10 +26,10 @@
         "list_allowed_directories"
       ]
     },
-    "ai-verde-datastore": {
+    "datastore": {
       "timeout": 60,
-      "type": "sse",
-      "url": "http://mcp.cyverse.ai/sse",
+      "type": "streamableHttp",
+      "url": "http://mcp.cyverse.ai/mcp",
       "autoApprove": [
         "ds_directory_tree",
         "ds_get_file_info",
