@@ -19,6 +19,10 @@ if [ -f /data-store/iplant/home/$IPLANT_USER/.gitconfig ]; then
   cp /data-store/iplant/home/$IPLANT_USER/.gitconfig ~/ 
 fi
 
+if [ -d /data-store/iplant/home/$IPLANT_USER/.aws ]; then
+  cp -r /data-store/iplant/home/$IPLANT_USER/.aws ~/ 
+fi
+
 if [ -d /data-store/iplant/home/$IPLANT_USER/.ssh ]; then
   cp -r /data-store/iplant/home/$IPLANT_USER/.ssh ~/ 
 fi
