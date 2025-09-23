@@ -101,6 +101,9 @@ RUN curl https://ollama.ai/install.sh | sh && \
 RUN npm install -g @modelcontextprotocol/server-filesystem && \
     echo "Filesystem MCP server installed"
 
+# Install Claude Code
+RUN 
+
 # Install Globus Connect Server
 RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb && \
     dpkg -i globus-repo_latest_all.deb && \
@@ -108,7 +111,40 @@ RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installe
     apt install globus-connect-server54 -y && \
     rm globus-repo_latest_all.deb
 
+# install AWS CLI
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update && \
+    rm -rf awscliv2.zip
+
+# install S3FS-FUSE for mounting S3 buckets
+RUN apt-get update && \
+    apt-get install -y s3fs fuse && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure FUSE for non-root users
+RUN echo "user_allow_other" >> /etc/fuse.conf && \
+    chmod 644 /etc/fuse.conf
+
+# Create /osn directory for OpenStorageNetwork bucket mounts
+RUN mkdir -p /osn && \
+    chmod 755 /osn && \
+    chown 1000:100 /osn
+
+# install Node and NPM
+RUN apt update && apt install -y nodejs npm
+     
+# set the ENV for the credential type
+ENV GCM_CREDENTIAL_STORE=cache
+
 USER vscode
+
+# Install  Claude Code
+RUN npm config set prefix /home/vscode/.npm-global && \
+    export PATH=/home/vscode/.npm-global/bin:$PATH && \
+    cd /home/vscode && \
+    npm install -g @anthropic-ai/claude-code
 
 # Install git credential manager
 RUN cd /home/vscode && \
