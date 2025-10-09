@@ -127,16 +127,17 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     rm -rf awscliv2.zip aws/ && \
     aws --version
 
-# Install S3FS-FUSE, configure FUSE, and create OSN directory in one layer
+# Install S3 tools (S3FS-FUSE and S3 CLI), configure FUSE, and create OSN directory in one layer
 RUN apt-get update && \
-    apt-get install -y s3fs fuse && \
+    apt-get install -y s3fs fuse s3cmd && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     echo "user_allow_other" >> /etc/fuse.conf && \
     chmod 644 /etc/fuse.conf && \
     mkdir -p /osn && \
     chmod 755 /osn && \
-    chown 1000:100 /osn
+    chown 1000:100 /osn && \
+    s3cmd --version
 
 # Node.js already installed above - no need to reinstall
      

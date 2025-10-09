@@ -23,6 +23,7 @@ This VS Code Server container comes with:
 - **Git Credential Manager** - Seamless Git authentication
 - **GoCommands** - CyVerse Data Store integration
 - **AWS CLI v2** - Amazon Web Services command-line interface
+- **S3 CLI (s3cmd)** - Command-line S3 client and backup tool
 - **S3FS-FUSE** - Mount S3 buckets as filesystems
 - **Globus Connect Server** - High-performance data transfer
 - **Claude Code** - AI-powered VS Code assistant
