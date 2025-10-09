@@ -1,5 +1,5 @@
 # Use specific version tag instead of latest for better reproducibility
-FROM lscr.io/linuxserver/code-server:latest
+FROM lscr.io/linuxserver/code-server:4.23.1
 
 # Add metadata labels
 LABEL maintainer="CyVerse.org"
@@ -34,11 +34,13 @@ RUN apt update && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Node
-RUN curl -fsSL https://deb.nodesource.com/setup_23.x -o nodesource_setup.sh && \
+# Install Node.js (pin to LTS version for stability)
+ARG NODE_VERSION="20"
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x -o nodesource_setup.sh && \
     bash nodesource_setup.sh && \
     apt install -y nodejs && \
-    rm nodesource_setup.sh
+    rm nodesource_setup.sh && \
+    npm --version && node --version
 
 # Install GoCommands https://learning.cyverse.org/ds/gocommands/
 RUN cd /usr/local/bin/ && \
@@ -46,11 +48,12 @@ RUN cd /usr/local/bin/ && \
     curl -L -s https://github.com/cyverse/gocommands/releases/download/${GOCMD_VER}/gocmd-${GOCMD_VER}-linux-amd64.tar.gz | tar zxvf - && \
     echo "GoCommands ${GOCMD_VER} installed"
 
-# Set up version arguments for easier updates
+# Set up version arguments for easier updates and better caching
 ARG CUDA_VERSION="12-5"
 ARG NVIDIA_DRIVER_VERSION="535"
-ARG MINICONDA_VERSION="latest"
+ARG MINICONDA_VERSION="24.7.1-0"
 ARG GCM_VERSION="2.5.0"
+ARG OLLAMA_VERSION="0.3.12"
 
 # Handle user setup - base image already has a user with GID 1000
 RUN if getent group vscode > /dev/null; then \
@@ -79,7 +82,7 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Miniconda and Mamba
+# Install Miniconda and Mamba with version pinning
 RUN curl -sSLo /tmp/Miniconda3.sh https://repo.anaconda.com/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
     bash /tmp/Miniconda3.sh -b -p /opt/conda && \
     rm /tmp/Miniconda3.sh && \
@@ -87,7 +90,7 @@ RUN curl -sSLo /tmp/Miniconda3.sh https://repo.anaconda.com/miniconda/Miniconda3
     /opt/conda/bin/conda install -y mamba -n base -c conda-forge --override-channels && \
     /opt/conda/bin/conda clean -afy && \
     chown -R vscode:vscode /opt/conda && \
-    echo "Miniconda and Mamba installed successfully"
+    echo "Miniconda ${MINICONDA_VERSION} and Mamba installed successfully"
 
 # Install Ollama
 RUN curl https://ollama.ai/install.sh | sh && \
@@ -101,8 +104,14 @@ RUN curl https://ollama.ai/install.sh | sh && \
 RUN npm install -g @modelcontextprotocol/server-filesystem && \
     echo "Filesystem MCP server installed"
 
-# Install Claude Code
-RUN 
+# Install GitHub CLI
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt update && \
+    apt install -y gh && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Globus Connect Server
 RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb && \
@@ -111,29 +120,25 @@ RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installe
     apt install globus-connect-server54 -y && \
     rm globus-repo_latest_all.deb
 
-# install AWS CLI
+# Install AWS CLI v2
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
     ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update && \
-    rm -rf awscliv2.zip
+    rm -rf awscliv2.zip aws/ && \
+    aws --version
 
-# install S3FS-FUSE for mounting S3 buckets
+# Install S3FS-FUSE, configure FUSE, and create OSN directory in one layer
 RUN apt-get update && \
     apt-get install -y s3fs fuse && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Configure FUSE for non-root users
-RUN echo "user_allow_other" >> /etc/fuse.conf && \
-    chmod 644 /etc/fuse.conf
-
-# Create /osn directory for OpenStorageNetwork bucket mounts
-RUN mkdir -p /osn && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "user_allow_other" >> /etc/fuse.conf && \
+    chmod 644 /etc/fuse.conf && \
+    mkdir -p /osn && \
     chmod 755 /osn && \
     chown 1000:100 /osn
 
-# install Node and NPM
-RUN apt update && apt install -y nodejs npm
+# Node.js already installed above - no need to reinstall
      
 # set the ENV for the credential type
 ENV GCM_CREDENTIAL_STORE=cache

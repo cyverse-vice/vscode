@@ -19,12 +19,18 @@ This VS Code Server container comes with:
 - **NVIDIA CUDA 12.5** - GPU acceleration support
 - **Miniconda & Mamba** - Efficient Python package management
 - **Ollama** - Run AI models locally
+- **GitHub CLI** - Integrated GitHub command-line interface
 - **Git Credential Manager** - Seamless Git authentication
 - **GoCommands** - CyVerse Data Store integration
+- **AWS CLI v2** - Amazon Web Services command-line interface
+- **S3FS-FUSE** - Mount S3 buckets as filesystems
+- **Globus Connect Server** - High-performance data transfer
+- **Claude Code** - AI-powered VS Code assistant
 - **Pre-installed VS Code Extensions**:
   - Python
   - Jupyter
   - vscode-icons
+  - Claude Dev
 
 ## Run Docker Locally
 
@@ -75,8 +81,22 @@ The Dockerfile implements several best practices:
 - Built-in healthcheck for container monitoring
 - CUDA 12.5 and NVIDIA driver integration
 - Pre-configured VS Code extensions for Python development
+- GitHub CLI integration for seamless Git operations
+- Support for Kubernetes CSI-mounted environment files
 
 ## Advanced Usage
+
+### Environment Files Support
+
+The container supports loading environment variables from hidden `.env` files mounted via Kubernetes CSI drivers. Place `.env` files in the user's home directory:
+
+- `~/.env` - Main environment file
+- `~/.env.secrets` - Secrets and credentials
+- `~/.env.production` - Production-specific variables
+
+These files will be automatically loaded on container startup.
+
+### Local Testing
 
 For testing with mounted home directory:
 
