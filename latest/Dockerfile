@@ -90,7 +90,7 @@ RUN curl -sSLo /tmp/Miniconda3.sh https://repo.anaconda.com/miniconda/Miniconda3
     echo "Miniconda and Mamba installed successfully"
 
 # Install Ollama
-RUN curl https://ollama.ai/install.sh | sh && \
+RUN curl -fsSL https://ollama.com/install.sh | sh && \
     echo "Ollama installed successfully"
 
 # Initialize Ollama with models (commented out - uncomment if needed)
