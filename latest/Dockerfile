@@ -30,7 +30,8 @@ RUN apt update && \
         nano \
         wget \
         sudo \
-        pciutils && \
+        pciutils \
+        zstd && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
