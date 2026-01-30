@@ -134,17 +134,25 @@ RUN mkdir -p /osn && \
 
 # install Node and NPM
 RUN apt update && apt install -y nodejs npm
-     
+
+# Install GitHub CLI
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt update && apt install -y gh && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # set the ENV for the credential type
 ENV GCM_CREDENTIAL_STORE=cache
 
 USER vscode
 
-# Install  Claude Code
+# Install Claude Code, Gemini CLI, and OpenAI Codex
 RUN npm config set prefix /home/vscode/.npm-global && \
     export PATH=/home/vscode/.npm-global/bin:$PATH && \
     cd /home/vscode && \
-    npm install -g @anthropic-ai/claude-code
+    npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex
+ENV PATH="/home/vscode/.npm-global/bin:${PATH}"
 
 # Install git credential manager
 RUN cd /home/vscode && \
