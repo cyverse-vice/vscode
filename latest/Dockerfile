@@ -31,6 +31,7 @@ RUN apt update && \
         wget \
         sudo \
         pciutils \
+        unzip \
         zstd && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
@@ -102,9 +103,6 @@ RUN curl -fsSL https://ollama.com/install.sh | sh && \
 RUN npm install -g @modelcontextprotocol/server-filesystem && \
     echo "Filesystem MCP server installed"
 
-# Install Claude Code
-RUN 
-
 # Install Globus Connect Server
 RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb && \
     dpkg -i globus-repo_latest_all.deb && \
@@ -133,9 +131,6 @@ RUN mkdir -p /osn && \
     chmod 755 /osn && \
     chown 1000:100 /osn
 
-# install Node and NPM
-RUN apt update && apt install -y nodejs npm
-
 # Install GitHub CLI
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
     chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
@@ -148,8 +143,9 @@ ENV GCM_CREDENTIAL_STORE=cache
 
 USER vscode
 
-# Install Claude Code, Gemini CLI, and OpenAI Codex
-RUN npm config set prefix /home/vscode/.npm-global && \
+# Fix npm cache permissions and install Claude Code, Gemini CLI, and OpenAI Codex
+RUN sudo chown -R vscode:vscode /config/.npm 2>/dev/null || true && \
+    npm config set prefix /home/vscode/.npm-global && \
     export PATH=/home/vscode/.npm-global/bin:$PATH && \
     cd /home/vscode && \
     npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex
