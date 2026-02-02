@@ -143,12 +143,15 @@ ENV GCM_CREDENTIAL_STORE=cache
 
 USER vscode
 
-# Fix npm cache permissions and install Claude Code, Gemini CLI, and OpenAI Codex
+# Install Claude Code using official installer
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+# Install Gemini CLI and OpenAI Codex via npm
 RUN sudo chown -R vscode:vscode /config/.npm 2>/dev/null || true && \
     npm config set prefix /home/vscode/.npm-global && \
     export PATH=/home/vscode/.npm-global/bin:$PATH && \
     cd /home/vscode && \
-    npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex
+    npm install -g @google/gemini-cli @openai/codex
 ENV PATH="/home/vscode/.npm-global/bin:${PATH}"
 
 # Install git credential manager
