@@ -8,10 +8,14 @@ LABEL version="1.0"
 
 USER root
 
+# Prevent interactive prompts and service starts during build
+ENV DEBIAN_FRONTEND=noninteractive
+RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
+
 # Install dependencies for goCommands, text editing, and monitoring
 # Note: Combined multiple apt commands to reduce layers
-RUN apt update && \
-    apt install -y \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
         lsb-release \
         apt-transport-https \
         curl \
@@ -33,13 +37,13 @@ RUN apt update && \
         pciutils \
         unzip \
         zstd && \
-    apt clean && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Node
 RUN curl -fsSL https://deb.nodesource.com/setup_23.x -o nodesource_setup.sh && \
     bash nodesource_setup.sh && \
-    apt install -y nodejs && \
+    apt-get install -y nodejs && \
     rm nodesource_setup.sh
 
 # Install GoCommands https://learning.cyverse.org/ds/gocommands/
@@ -52,7 +56,7 @@ RUN cd /usr/local/bin/ && \
 ARG CUDA_VERSION="12-5"
 ARG NVIDIA_DRIVER_VERSION="535"
 ARG MINICONDA_VERSION="latest"
-ARG GCM_VERSION="2.5.0"
+ARG GCM_VERSION="2.7.3"
 
 # Handle user setup - base image already has a user with GID 1000
 RUN if getent group vscode > /dev/null; then \
@@ -76,9 +80,9 @@ RUN if getent group vscode > /dev/null; then \
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb && \
     dpkg -i cuda-keyring_1.1-1_all.deb && \
     rm cuda-keyring_1.1-1_all.deb && \
-    apt update && \
-    apt install -y cuda-toolkit-${CUDA_VERSION} nvidia-driver-${NVIDIA_DRIVER_VERSION} && \
-    apt clean && \
+    apt-get update && \
+    apt-get install -y cuda-toolkit-${CUDA_VERSION} nvidia-driver-${NVIDIA_DRIVER_VERSION} && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Miniconda and Mamba
@@ -106,8 +110,8 @@ RUN npm install -g @modelcontextprotocol/server-filesystem && \
 # Install Globus Connect Server
 RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb && \
     dpkg -i globus-repo_latest_all.deb && \
-    apt update && \
-    apt install globus-connect-server54 -y && \
+    apt-get update && \
+    apt-get install -y globus-connect-server54 && \
     rm globus-repo_latest_all.deb
 
 # install AWS CLI
@@ -135,7 +139,7 @@ RUN mkdir -p /osn && \
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
     chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-    apt update && apt install -y gh && \
+    apt-get update && apt-get install -y gh && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # set the ENV for the credential type
@@ -143,16 +147,16 @@ ENV GCM_CREDENTIAL_STORE=cache
 
 USER vscode
 
-# Install Claude Code using official installer
-RUN curl -fsSL https://claude.ai/install.sh | bash
+# Set up npm prefix for user-local global installs
+RUN sudo chown -R vscode:vscode /config/.npm 2>/dev/null || true && \
+    npm config set prefix /home/vscode/.npm-global
+ENV PATH="/home/vscode/.npm-global/bin:${PATH}"
+
+# Install Claude Code via npm (official installer fails in non-interactive Docker builds)
+RUN npm install -g @anthropic-ai/claude-code
 
 # Install Gemini CLI and OpenAI Codex via npm
-RUN sudo chown -R vscode:vscode /config/.npm 2>/dev/null || true && \
-    npm config set prefix /home/vscode/.npm-global && \
-    export PATH=/home/vscode/.npm-global/bin:$PATH && \
-    cd /home/vscode && \
-    npm install -g @google/gemini-cli @openai/codex
-ENV PATH="/home/vscode/.npm-global/bin:${PATH}"
+RUN npm install -g @google/gemini-cli @openai/codex
 
 # Install git credential manager
 RUN cd /home/vscode && \
