@@ -160,9 +160,9 @@ RUN npm install -g @google/gemini-cli @openai/codex
 
 # Install git credential manager
 RUN cd /home/vscode && \
-    wget https://github.com/git-ecosystem/git-credential-manager/releases/download/v${GCM_VERSION}/gcm-linux_amd64.${GCM_VERSION}.deb && \
-    sudo dpkg -i gcm-linux_amd64.${GCM_VERSION}.deb && \
-    rm gcm-linux_amd64.${GCM_VERSION}.deb && \
+    wget https://github.com/git-ecosystem/git-credential-manager/releases/download/v${GCM_VERSION}/gcm-linux-x64-${GCM_VERSION}.deb && \
+    sudo dpkg -i gcm-linux-x64-${GCM_VERSION}.deb && \
+    rm gcm-linux-x64-${GCM_VERSION}.deb && \
     echo "Git Credential Manager installed"
 
 # Set the environment variable for the credential type
