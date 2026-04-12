@@ -150,13 +150,14 @@ USER vscode
 # Set up npm prefix for user-local global installs
 RUN sudo chown -R vscode:vscode /config/.npm 2>/dev/null || true && \
     npm config set prefix /home/vscode/.npm-global
-ENV PATH="/home/vscode/.npm-global/bin:${PATH}"
+ENV PATH="/home/vscode/.npm-global/bin:/home/vscode/.opencode/bin:${PATH}"
 
-# Install Claude Code via npm (official installer fails in non-interactive Docker builds)
-RUN npm install -g @anthropic-ai/claude-code
+# Install Claude Code, Gemini CLI, and OpenAI Codex via npm
+RUN npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex && \
+    npm cache clean --force
 
-# Install Gemini CLI and OpenAI Codex via npm
-RUN npm install -g @google/gemini-cli @openai/codex
+# Install OpenCode (https://opencode.ai/)
+RUN curl -fsSL https://opencode.ai/install | bash
 
 # Install git credential manager
 RUN cd /home/vscode && \
