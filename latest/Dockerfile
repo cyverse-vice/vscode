@@ -157,7 +157,7 @@ RUN npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex &&
     npm cache clean --force
 
 # Install OpenCode (https://opencode.ai/)
-RUN curl -fsSL https://opencode.ai/install | bash
+RUN curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
 
 # Install git credential manager
 RUN cd /home/vscode && \
