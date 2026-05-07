@@ -101,9 +101,6 @@ RUN curl -fsSL https://ollama.com/install.sh | sh && \
 RUN npm install -g @modelcontextprotocol/server-filesystem && \
     echo "Filesystem MCP server installed"
 
-# Install Claude Code
-RUN 
-
 # Install Globus Connect Server
 RUN curl -LOs https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb && \
     dpkg -i globus-repo_latest_all.deb && \
@@ -140,11 +137,11 @@ ENV GCM_CREDENTIAL_STORE=cache
 
 USER vscode
 
-# Install  Claude Code
+# Install AI coding assistants: Claude Code, OpenAI Codex CLI, Gemini CLI, OpenCode
 RUN npm config set prefix /home/vscode/.npm-global && \
     export PATH=/home/vscode/.npm-global/bin:$PATH && \
     cd /home/vscode && \
-    npm install -g @anthropic-ai/claude-code
+    npm install -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli opencode-ai
 
 # Install git credential manager
 RUN cd /home/vscode && \
