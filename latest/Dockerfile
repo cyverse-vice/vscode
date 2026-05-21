@@ -150,11 +150,16 @@ USER vscode
 # Set up npm prefix for user-local global installs
 RUN sudo chown -R vscode:vscode /config/.npm 2>/dev/null || true && \
     npm config set prefix /home/vscode/.npm-global
-ENV PATH="/home/vscode/.npm-global/bin:/home/vscode/.opencode/bin:${PATH}"
+ENV PATH="/home/vscode/.local/bin:/home/vscode/.npm-global/bin:/home/vscode/.opencode/bin:${PATH}"
 
 # Install Claude Code, Gemini CLI, and OpenAI Codex via npm
-RUN npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex && \
+RUN npm install -g @anthropic-ai/claude-code @openai/codex && \
     npm cache clean --force
+
+# Install Antigravity CLI (replaces deprecated Google Gemini CLI — deadline June 18 2026)
+# https://antigravity.google/blog/introducing-google-antigravity-cli
+# Binary: agy, installed to ~/.local/bin
+RUN curl -fsSL https://antigravity.google/cli/install.sh | bash
 
 # Install OpenCode (https://opencode.ai/)
 RUN curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path
