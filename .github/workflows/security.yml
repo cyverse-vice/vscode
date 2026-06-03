@@ -1,0 +1,55 @@
+# Image security scanning for the CyVerse VICE vscode image.
+# Scaffolded from the vice-toolkit plugin (audit-vice-image-security skill) and
+# adapted for this repo: hadolint runs on every PR (fast); the trivy CVE scan
+# runs weekly + on demand against the PUBLISHED Harbor image, because vscode is
+# a large CUDA/conda image we do not want to rebuild on every PR. Report-only by
+# default — flip the marked knobs to gate.
+name: security
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'   # weekly, mirrors harbor.yml
+
+permissions:
+  contents: read
+  security-events: write   # needed to upload SARIF to the Security tab
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: latest/Dockerfile
+          config: .hadolint.yaml
+          failure-threshold: warning
+          no-fail: true            # report-only — set false to gate the PR on lint
+
+  scan:
+    # CVE scan of the published image. Heavy, so it is skipped on PRs and runs
+    # weekly + on demand. To scan a locally built image instead, build it first
+    # and set image-ref to that tag.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan published image for CVEs (trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: harbor.cyverse.org/vice/vscode:latest
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '0'           # report-only — set '1' to fail on fixable findings
+        env:
+          TRIVY_TIMEOUT: 20m
+      - name: Upload results to the GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-vscode
